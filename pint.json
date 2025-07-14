@@ -41,7 +41,7 @@
         },
         "class_attributes_separation": {
             "elements": {
-                "property": "only_if_meta"
+                "property": "one"
             }
         },
         "modernize_types_casting": true,

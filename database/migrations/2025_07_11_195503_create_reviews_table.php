@@ -16,7 +16,7 @@ return new class () extends Migration {
             $table->id();
             $table->uuid()->unique();
             $table->foreignId('book_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
             $table->string('title');
             $table->longText('body')->nullable();
             $table->unsignedTinyInteger('rating')->default(0);

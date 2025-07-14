@@ -30,7 +30,7 @@ final class BookFactory extends Factory
             'page_count' => fake()->numberBetween(100, 600),
             'format' => fake()->randomElement(['Paperback', 'Hardcover', 'Ebook']),
             'cover_url' => fake()->imageUrl(400, 600, 'books', randomize: true),
-            'released_at' => fake()->date(),
+            'released_at' => fake()->dateTimeBetween('-50 years')->format('Y-m-d'),
         ];
     }
 

@@ -28,7 +28,7 @@ final class ReviewFactory extends Factory
             'spoiler' => fake()->boolean(25),
             'title' => fake()->sentence(),
             'body' => fake()->paragraphs(3, asText: true),
-            'approved_at' => $status === 'approved' ? now() : null,
+            'approved_at' => $status === 'approved' ? fake()->dateTimeBetween('-2 years') : null,
         ];
     }
 

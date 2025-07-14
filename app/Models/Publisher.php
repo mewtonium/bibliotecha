@@ -46,6 +46,6 @@ final class Publisher extends Model
      */
     public function books(): HasMany
     {
-        return $this->hasMany(Publisher::class);
+        return $this->hasMany(Book::class);
     }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Models\Concerns\HasPublicUuid;
+use App\Models\Concerns\Sluggable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -14,6 +15,7 @@ final class Author extends Model
     /** @use HasFactory<\Database\Factories\AuthorFactory> */
     use HasFactory;
     use HasPublicUuid;
+    use Sluggable;
 
     /**
      * The attributes that are mass assignable.
@@ -28,6 +30,18 @@ final class Author extends Model
         'website',
         'photo_url',
     ];
+
+    /**
+     * The attributes that are sluggable.
+     *
+     * @var list<string, string|list<string>>
+     */
+    public function sluggable(): array
+    {
+        return [
+            'slug' => ['first_name', 'last_name'],
+        ];
+    }
 
     /**
      * Get the books for this author.

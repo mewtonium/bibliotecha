@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Models\Concerns\HasPublicUuid;
+use App\Models\Concerns\Sluggable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,6 +17,7 @@ final class Book extends Model
     /** @use HasFactory<\Database\Factories\BookFactory> */
     use HasFactory;
     use HasPublicUuid;
+    use Sluggable;
 
     /**
      * The attributes that are mass assignable.
@@ -34,6 +36,18 @@ final class Book extends Model
         'cover_url',
         'released_at',
     ];
+
+    /**
+     * The attributes that are sluggable.
+     *
+     * @var list<string, string|list<string>>
+     */
+    public function sluggable(): array
+    {
+        return [
+            'slug' => 'title',
+        ];
+    }
 
     /**
      * Get the publisher of this book.

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Genre>
@@ -19,9 +20,18 @@ final class GenreFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $name = fake()->word(),
+            'name' => fake()->word(),
             'description' => fake()->sentence(),
-            'slug' => str($name)->slug(),
         ];
+    }
+
+    /**
+     * Add the slug attribute to this model.
+     */
+    public function slug(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'slug' => Str::slug($attributes['name']),
+        ]);
     }
 }

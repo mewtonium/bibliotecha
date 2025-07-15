@@ -14,7 +14,7 @@ final class ApiResponse implements Responsable
      * Create a new instance of an API response.
      */
     public function __construct(
-        protected JsonResource|array $resource,
+        protected JsonResource|array $data,
         protected int $status,
         protected bool $success = true,
     ) {
@@ -24,17 +24,35 @@ final class ApiResponse implements Responsable
     /**
      * Return a successful API response.
      */
-    public static function success(JsonResource|array $resource, int $status = Response::HTTP_OK): static
+    public static function success(JsonResource|array $data, int $status = Response::HTTP_OK): static
     {
-        return new static($resource, $status, success: true);
+        return new static($data, $status, success: true);
     }
 
     /**
      * Return a failed API response.
+     *
+     * If an exception is provided and `app.debug` is enabled in config,
+     * then extra debugging data will also be returned.
      */
-    public static function failed(array $resource, int $status = Response::HTTP_BAD_REQUEST): static
+    public static function failed(array $errors, int $status = Response::HTTP_BAD_REQUEST, ?\Throwable $exception = null): static
     {
-        return new static($resource, $status, success: false);
+        $data = [
+            'errors' => $errors,
+        ];
+
+        if (! is_null($exception) && config('app.debug')) {
+            $data['debug'] = [
+                'exception' => get_class($exception),
+                'message' => $exception->getMessage(),
+                'file' => $exception->getFile(),
+                'line' => $exception->getLine(),
+                'code' => $exception->getCode(),
+                'trace' => collect($exception->getTrace())->take(10)->all(),
+            ];
+        }
+
+        return new static($data, $status, success: false);
     }
 
     /**
@@ -45,15 +63,15 @@ final class ApiResponse implements Responsable
      */
     public function toResponse($request)
     {
-        $resource = $this->resource instanceof JsonResource
-            ? $this->resource->response($request)->getData(assoc: true)
-            : (array) $this->resource;
+        $data = $this->data instanceof JsonResource
+            ? $this->data->response($request)->getData(assoc: true)
+            : (array) $this->data;
 
         return response()->json(
             status: $this->status,
             data: [
                 'success' => $this->success,
-                ...$resource,
+                ...$data,
             ],
         );
     }

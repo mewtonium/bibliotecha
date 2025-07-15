@@ -52,15 +52,63 @@ test('a successful response is returned using an array of data', function (): vo
         ]);
 });
 
-test('a failed response is returned', function (): void {
+test('a failed response is returned with errors', function (): void {
+    $errors = [
+        ['first_name' => 'The first name field is required'],
+        ['last_name' => 'The last name field is required'],
+    ];
+
     /** @var JsonResponse */
-    $response = ApiResponse::failed(['error' => 'Something went wrong...'])->toResponse(request());
+    $response = ApiResponse::failed($errors)->toResponse(request());
 
     expect($response->getStatusCode())->toBe(400);
 
     expect($response->getData(assoc: true))
         ->toMatchArray([
             'success' => false,
-            'error' => 'Something went wrong...',
+            'errors' => $errors,
         ]);
+});
+
+test('a failed response is returned with extra debug info if app.debug is enabled and exception provided', function (): void {
+    config(['app.debug' => true]);
+
+    $errors = [
+        ['first_name' => 'The first name field is required'],
+        ['last_name' => 'The last name field is required'],
+    ];
+
+    /** @var JsonResponse */
+    $response = ApiResponse::failed($errors, exception: $e = new \Exception('Form validation failed'))->toResponse(request());
+
+    expect($response->getStatusCode())->toBe(400);
+
+    expect($data = $response->getData(assoc: true))
+        ->toMatchArray([
+            'success' => false,
+            'errors' => $errors,
+        ])
+        ->and($data)->toHaveKey('debug')
+        ->and($data['debug'])->toHaveKeys(['exception', 'message', 'file', 'line', 'code', 'trace']);
+});
+
+test('a failed response is not returned with extra debug info if app.debug is disabled but exception still provided', function (): void {
+    config(['app.debug' => false]);
+
+    $errors = [
+        ['first_name' => 'The first name field is required'],
+        ['last_name' => 'The last name field is required'],
+    ];
+
+    /** @var JsonResponse */
+    $response = ApiResponse::failed($errors, exception: new \Exception('Form validation failed'))->toResponse(request());
+
+    expect($response->getStatusCode())->toBe(400);
+
+    expect($data = $response->getData(assoc: true))
+        ->toMatchArray([
+            'success' => false,
+            'errors' => $errors,
+        ])
+        ->and($data)->not->toHaveKey('debug');
 });

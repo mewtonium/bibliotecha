@@ -6,6 +6,7 @@ use App\Http\Resources\Api\V1\UserResource;
 use App\Http\Responses\ApiResponse;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 
 test('a successful response is returned using an API resource', function (): void {
     $user = User::factory()->create();
@@ -14,7 +15,7 @@ test('a successful response is returned using an API resource', function (): voi
     /** @var JsonResponse */
     $response = ApiResponse::success($resource)->toResponse(request());
 
-    expect($response->getStatusCode())->toBe(200);
+    expect($response->getStatusCode())->toBe(Response::HTTP_OK);
 
     expect($response->getData(assoc: true))
         ->toMatchArray([
@@ -35,7 +36,7 @@ test('a successful response is returned using an array of data', function (): vo
     /** @var JsonResponse */
     $response = ApiResponse::success(['data' => $user->toArray()])->toResponse(request());
 
-    expect($response->getStatusCode())->toBe(200);
+    expect($response->getStatusCode())->toBe(Response::HTTP_OK);
 
     expect($response->getData(assoc: true))
         ->toMatchArray([
@@ -61,7 +62,7 @@ test('a failed response is returned with errors', function (): void {
     /** @var JsonResponse */
     $response = ApiResponse::failed($errors)->toResponse(request());
 
-    expect($response->getStatusCode())->toBe(400);
+    expect($response->getStatusCode())->toBe(Response::HTTP_BAD_REQUEST);
 
     expect($response->getData(assoc: true))
         ->toMatchArray([
@@ -81,7 +82,7 @@ test('a failed response is returned with extra debug info if app.debug is enable
     /** @var JsonResponse */
     $response = ApiResponse::failed($errors, exception: $e = new \Exception('Form validation failed'))->toResponse(request());
 
-    expect($response->getStatusCode())->toBe(400);
+    expect($response->getStatusCode())->toBe(Response::HTTP_BAD_REQUEST);
 
     expect($data = $response->getData(assoc: true))
         ->toMatchArray([
@@ -103,7 +104,7 @@ test('a failed response is not returned with extra debug info if app.debug is di
     /** @var JsonResponse */
     $response = ApiResponse::failed($errors, exception: new \Exception('Form validation failed'))->toResponse(request());
 
-    expect($response->getStatusCode())->toBe(400);
+    expect($response->getStatusCode())->toBe(Response::HTTP_BAD_REQUEST);
 
     expect($data = $response->getData(assoc: true))
         ->toMatchArray([

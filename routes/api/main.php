@@ -7,5 +7,5 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')
     ->as('api.')
     ->group(function (): void {
-        require_once __DIR__ . '/v1.php';
+        require __DIR__ . '/v1.php';
     });

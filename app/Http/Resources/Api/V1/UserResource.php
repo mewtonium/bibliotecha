@@ -24,6 +24,7 @@ final class UserResource extends JsonResource
             'name' => $this->name,
             'email' => $this->email,
             ...$this->timestamps(),
+            'reviews' => $this->whenLoaded('reviews'),
         ];
     }
 }

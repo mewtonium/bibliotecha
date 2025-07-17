@@ -12,7 +12,7 @@ trait ResourceDates
      * Return the resource `created_at` and `updated_at` timestamp attributes formatted.
      * The soft delete column `deleted_at` is conditionally formatted.
      *
-     * @var array{updated_at: string, created_at: string, deleted_at?: string|null}
+     * @return array{updated_at: string, created_at: string, deleted_at?: string|null}
      */
     public function timestamps(): array
     {

@@ -32,7 +32,7 @@ final class Publisher extends Model
     /**
      * The attributes that are sluggable.
      *
-     * @var array<string, string|string[]>
+     * @return array<string, string|list<string>>
      */
     public function sluggable(): array
     {

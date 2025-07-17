@@ -24,7 +24,7 @@ trait Sluggable
     /**
      * The attributes that are sluggable.
      *
-     * @var list<string, string|list<string>>
+     * @return array<string, string|list<string>>
      */
     public function sluggable(): array
     {

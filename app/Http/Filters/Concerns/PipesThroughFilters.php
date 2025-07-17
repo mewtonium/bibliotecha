@@ -11,6 +11,9 @@ use Illuminate\Support\Facades\Pipeline;
 
 trait PipesThroughFilters
 {
+    /**
+     * Pipes a query builder instance through a list of filters.
+     */
     public function pipeThroughFilters(Builder $query): Collection
     {
         return Pipeline::send($query)

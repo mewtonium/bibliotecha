@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Resources\Api\V1\UserResource;
 use App\Http\Responses\ApiResponse;
 use App\Models\User;
+use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 
@@ -80,7 +81,7 @@ test('a failed response is returned with extra debug info if app.debug is enable
     ];
 
     /** @var JsonResponse */
-    $response = ApiResponse::failed($errors, exception: $e = new \Exception('Form validation failed'))->toResponse(request());
+    $response = ApiResponse::failed($errors, exception: new \Exception('Form validation failed'))->toResponse(request());
 
     expect($response->getStatusCode())->toBe(Response::HTTP_BAD_REQUEST);
 
@@ -112,4 +113,45 @@ test('a failed response is not returned with extra debug info if app.debug is di
             'errors' => $errors,
         ])
         ->and($data)->not->toHaveKey('debug');
+});
+
+test('a failed response which would normally return debug as part of its response data info is stripped out and is in the extra debug info instead', function (): void {
+    config(['app.debug' => true]);
+
+    /** @var JsonResponse */
+    $response = ApiResponse::failed(['message' => 'Something went wrong...'], exception: new \RuntimeException('Something went wrong...'))->toResponse(request());
+
+    expect($response->getStatusCode())->toBe(Response::HTTP_BAD_REQUEST);
+
+    expect($data = $response->getData(assoc: true))
+        ->toMatchArray([
+            'success' => false,
+            'errors' => [
+                'message' => 'Something went wrong...',
+            ],
+        ])
+        ->and($data['errors'])->not->toHaveKeys(['exception', 'file', 'line', 'trace'])
+        ->and($data)->toHaveKey('debug')
+        ->and($data['debug'])->toHaveKeys(['exception', 'message', 'file', 'line', 'code', 'trace']);
+});
+
+test('a response can include custom headers', function (): void {
+    $headers = [
+        'retry-after' => 60,
+        'x-ratelimit-limit' => 2,
+        'x-ratelimit-remaining' => 0,
+        'x-ratelimit-reset' => 1721479999,
+    ];
+
+    /** @var JsonResponse */
+    $response = ApiResponse::failed(
+        errors: ['message' => 'Something went wrong...'],
+        status: Response::HTTP_TOO_MANY_REQUESTS,
+        exception: new ThrottleRequestsException('Too May Attempts.'),
+        headers: $headers,
+    )->toResponse(request());
+
+    foreach ($headers as $key => $value) {
+        expect($response->headers->get($key))->toBe((string) $value);
+    }
 });

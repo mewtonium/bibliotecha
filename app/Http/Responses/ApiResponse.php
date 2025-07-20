@@ -7,6 +7,7 @@ namespace App\Http\Responses;
 use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Response;
+use Illuminate\Support\Arr;
 
 final class ApiResponse implements Responsable
 {
@@ -17,6 +18,7 @@ final class ApiResponse implements Responsable
         protected JsonResource|array $data,
         protected int $status,
         protected bool $success = true,
+        protected array $headers = [],
     ) {
         // ...
     }
@@ -24,9 +26,9 @@ final class ApiResponse implements Responsable
     /**
      * Return a successful API response.
      */
-    public static function success(JsonResource|array $data, int $status = Response::HTTP_OK): static
+    public static function success(JsonResource|array $data, int $status = Response::HTTP_OK, array $headers = []): static
     {
-        return new static($data, $status, success: true);
+        return new static($data, $status, true, $headers);
     }
 
     /**
@@ -35,10 +37,10 @@ final class ApiResponse implements Responsable
      * If an exception is provided and `app.debug` is enabled in config,
      * then extra debugging data will also be returned.
      */
-    public static function failed(array $errors, int $status = Response::HTTP_BAD_REQUEST, ?\Throwable $exception = null): static
+    public static function failed(array $errors, int $status = Response::HTTP_BAD_REQUEST, ?\Throwable $exception = null, array $headers = []): static
     {
         $data = [
-            'errors' => $errors,
+            'errors' => Arr::except($errors, ['exception', 'file', 'line', 'trace']),
         ];
 
         if (! is_null($exception) && config('app.debug')) {
@@ -52,7 +54,7 @@ final class ApiResponse implements Responsable
             ];
         }
 
-        return new static($data, $status, success: false);
+        return new static($data, $status, false, $headers);
     }
 
     /**
@@ -73,6 +75,7 @@ final class ApiResponse implements Responsable
                 'success' => $this->success,
                 ...$data,
             ],
+            headers: $this->headers,
         );
     }
 }

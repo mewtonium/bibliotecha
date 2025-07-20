@@ -10,7 +10,7 @@ describe('GET /api/v1/users/me', function (): void {
     test('the endpoint returns the correct response', function (): void {
         Sanctum::actingAs($user = User::factory()->create());
 
-        $response = $this->get('/api/v1/users/me');
+        $response = $this->getJson('/api/v1/users/me');
 
         expect($response->getStatusCode())
             ->toBe(Response::HTTP_OK)
@@ -34,7 +34,7 @@ describe('GET /api/v1/users/me', function (): void {
 
         Sanctum::actingAs($user);
 
-        $response = $this->get('/api/v1/users/me?with=reviews');
+        $response = $this->getJson('/api/v1/users/me?with=reviews');
 
         expect($response->getStatusCode())
             ->toBe(Response::HTTP_OK)
@@ -51,7 +51,7 @@ describe('GET /api/v1/users/me', function (): void {
 
         Sanctum::actingAs($user);
 
-        $response = $this->get('/api/v1/users/me?with=testing');
+        $response = $this->getJson('/api/v1/users/me?with=testing');
 
         expect($response->getStatusCode())
             ->toBe(Response::HTTP_OK)

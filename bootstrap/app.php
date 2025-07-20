@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Exceptions\Renderers\ExceptionRenderer;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
@@ -26,5 +27,8 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
-    })->create();
+        $exceptions->render(ExceptionRenderer::validation());
+        $exceptions->render(ExceptionRenderer::throttle());
+        $exceptions->render(ExceptionRenderer::fallback());
+    })
+    ->create();
